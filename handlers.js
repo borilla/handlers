@@ -1,21 +1,46 @@
 var Handlers = (function() {
 
-	function addHandler(obj, method, handler) {
+	function after(obj, method, handler) {
 		var f = obj[method];
-		if (f.handlers) {
-			return f.handlers.push(handler);
+		if (!f.after) {
+			f = initHandlers(obj, method);
 		}
-		else {
-			var handlers = [handler];
-			var g = obj[method] = function() {
-				var result = f.apply(this, arguments);
-				triggerHandlers(handlers, result);
-			};
-			g.handlers = handlers;
-			g.restore = function() {
-				obj[method] = f;
-			}
+		f.after(handler);
+		return f;
+	}
+
+	function before(obj, method, handler) {
+		var f = obj[method];
+		if (!f.before) {
+			f = initHandlers(obj, method);
 		}
+		f.before(handler);
+		return f;
+	}
+
+	function initHandlers(obj, method) {
+		var f = obj[method];
+		var before = [];
+		var after = [];
+		var g = function() {
+			before.length && triggerHandlers(before);
+			var result = f.apply(this, arguments);
+			after.length && triggerHandlers(after, result);
+		};
+		g.before = function(handler) {
+			before.push(handler);
+			return g;
+		};
+		g.after = function(handler) {
+			after.push(handler);
+			return g;
+		};
+		g.restore = function() {
+			obj[method] = f;
+			return f;
+		};
+		obj[method] = g;
+		return g;
 	}
 
 	function triggerHandlers(handlers, result) {
@@ -25,6 +50,7 @@ var Handlers = (function() {
 	}
 
 	return {
-		addHandler: addHandler
+		after: after,
+		before: before
 	};
 }());
