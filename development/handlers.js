@@ -19,28 +19,28 @@ var Handlers = (function() {
 	}
 
 	function initHandlers(obj, method) {
-		var f = obj[method];
+		var original = obj[method];
 		var before = [];
 		var after = [];
-		var g = function() {
+		var replacement = function() {
 			before.length && triggerHandlers(before);
-			var result = f.apply(this, arguments);
+			var result = original.apply(this, arguments);
 			after.length && triggerHandlers(after, result);
 		};
-		g.before = function(handler) {
+		replacement.before = function(handler) {
 			before.push(handler);
-			return g;
+			return replacement;
 		};
-		g.after = function(handler) {
+		replacement.after = function(handler) {
 			after.push(handler);
-			return g;
+			return replacement;
 		};
-		g.restore = function() {
-			obj[method] = f;
-			return f;
+		replacement.restore = function() {
+			obj[method] = original;
+			return original;
 		};
-		obj[method] = g;
-		return g;
+		obj[method] = replacement;
+		return replacement;
 	}
 
 	function triggerHandlers(handlers, result) {
