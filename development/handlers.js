@@ -1,46 +1,38 @@
 var Handlers = (function() {
 
 	function after(obj, method, handler) {
-		var f = obj[method];
-		if (!f.after) {
-			f = initHandlers(obj, method);
-		}
-		f.after(handler);
-		return f;
+		return ensureHandlers(obj, method).after(handler);
 	}
 
 	function before(obj, method, handler) {
-		var f = obj[method];
-		if (!f.before) {
-			f = initHandlers(obj, method);
-		}
-		f.before(handler);
-		return f;
+		return ensureHandlers(obj, method).before(handler);
 	}
 
-	function initHandlers(obj, method) {
+	function ensureHandlers(obj, method) {
 		var original = obj[method];
-		var before = [];
+		if (original.after) {
+			return original;
+		}
+		// else
 		var after = [];
+		var before = [];
 		var replacement = function() {
 			before.length && triggerHandlers(before);
 			var result = original.apply(this, arguments);
 			after.length && triggerHandlers(after, result);
 		};
-		replacement.before = function(handler) {
-			before.push(handler);
-			return replacement;
-		};
 		replacement.after = function(handler) {
 			after.push(handler);
 			return replacement;
 		};
-		replacement.restore = function() {
-			obj[method] = original;
-			return original;
+		replacement.before = function(handler) {
+			before.push(handler);
+			return replacement;
 		};
-		obj[method] = replacement;
-		return replacement;
+		replacement.restore = function() {
+			return obj[method] = original;
+		};
+		return obj[method] = replacement;
 	}
 
 	function triggerHandlers(handlers, result) {

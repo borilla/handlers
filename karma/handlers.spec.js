@@ -23,6 +23,11 @@ describe('Handlers', function() {
 			handler2.callOrder = callOrder++;
 		};
 		handler2.callCount = 0;
+		handler3 = function() {
+			handler3.callCount += 1;
+			handler3.callOrder = callOrder++;
+		};
+		handler3.callCount = 0;
 	});
 
 	it('should have a before function', function() {
@@ -60,6 +65,24 @@ describe('Handlers', function() {
 		assert(typeof obj.method.before == 'function', 'added before method');
 		assert(typeof obj.method.after == 'function', 'added after method');
 		assert(typeof obj.method.restore == 'function', 'added restore method');
+	});
+
+	it('should be able to chain "before" methods', function() {
+		Handlers.before(obj, 'method', handler1).before(handler2).before(handler3);
+		obj.method();
+		assert(method.callCount == 1, 'original method was called');
+		assert(handler1.callCount == 1, 'handler1 was called');
+		assert(handler2.callCount == 1, 'handler2 was called');
+		assert(handler3.callCount == 1, 'handler3 was called');
+	});
+
+	it('should be able to chain "after" methods', function() {
+		Handlers.after(obj, 'method', handler1).after(handler2).after(handler3);
+		obj.method();
+		assert(method.callCount == 1, 'original method was called');
+		assert(handler1.callCount == 1, 'handler1 was called');
+		assert(handler2.callCount == 1, 'handler2 was called');
+		assert(handler3.callCount == 1, 'handler3 was called');
 	});
 
 	it('should be able to restore original method', function() {
