@@ -1,33 +1,20 @@
 describe('Handlers', function() {
 
-	var obj, method, handler1, handler2;
+	var sandbox, obj, method, handler1, handler2, handler3;
 
 	beforeEach(function() {
-		var callOrder = 0;
-		method = function() {
-			method.callCount += 1;
-			method.callOrder = callOrder++;
-			return 'result';
-		};
-		method.callCount = 0;
+		sandbox = sinon.sandbox.create();
+		method = sandbox.stub();
+		handler1 = sandbox.stub();
+		handler2 = sandbox.stub();
+		handler3 = sandbox.stub();
 		obj = {
 			method: method
 		};
-		handler1 = function() {
-			handler1.callCount += 1;
-			handler1.callOrder = callOrder++;
-		};
-		handler1.callCount = 0;
-		handler2 = function() {
-			handler2.callCount += 1;
-			handler2.callOrder = callOrder++;
-		};
-		handler2.callCount = 0;
-		handler3 = function() {
-			handler3.callCount += 1;
-			handler3.callOrder = callOrder++;
-		};
-		handler3.callCount = 0;
+	});
+
+	afterEach(function() {
+		sandbox.restore();
 	});
 
 	it('should have a before function', function() {
@@ -45,8 +32,8 @@ describe('Handlers', function() {
 		assert(method.callCount == 1, 'original method was called');
 		assert(handler1.callCount == 1, 'handler1 was called');
 		assert(handler2.callCount == 1, 'handler2 was called');
-		assert(handler1.callOrder < method.callOrder, 'handler1 was called before method');
-		assert(handler2.callOrder < method.callOrder, 'handler2 was called before method');
+		assert(handler1.calledBefore(method), 'handler1 was called before method');
+		assert(handler2.calledBefore(method), 'handler2 was called before method');
 	});
 
 	it('should fire "after" handlers after method is called', function() {
@@ -56,8 +43,8 @@ describe('Handlers', function() {
 		assert(method.callCount == 1, 'original method was called');
 		assert(handler1.callCount == 1, 'handler1 was called');
 		assert(handler2.callCount == 1, 'handler2 was called');
-		assert(handler1.callOrder > method.callOrder, 'handler1 was called after method');
-		assert(handler2.callOrder > method.callOrder, 'handler2 was called after method');
+		assert(handler1.calledAfter(method), 'handler1 was called after method');
+		assert(handler2.calledAfter(method), 'handler2 was called after method');
 	});
 
 	it('should add before, after and restore methods to function', function() {
