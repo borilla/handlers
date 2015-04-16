@@ -20,6 +20,7 @@ var Handlers = (function() {
 			before.length && triggerHandlers(before);
 			var result = original.apply(this, arguments);
 			after.length && triggerHandlers(after, result);
+			return result;
 		};
 		replacement.after = function(handler) {
 			after.push(handler);

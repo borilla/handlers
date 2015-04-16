@@ -1,13 +1,15 @@
 (function() {
 	module('Handlers');
 
-	var obj, method, handler1, handler2;
+	var obj, method, returnValue, handler1, handler2;
 
 	QUnit.testStart(function() {
 		var callOrder = 0;
+		returnValue = {};
 		method = function() {
 			method.callCount += 1;
 			method.callOrder = callOrder++;
+			return returnValue;
 		};
 		method.callCount = 0;
 		obj = {
@@ -60,6 +62,12 @@
 		ok(typeof obj.method.before == 'function', 'added before method');
 		ok(typeof obj.method.after == 'function', 'added after method');
 		ok(typeof obj.method.restore == 'function', 'added restore method');
+	});
+
+	test('should return original return value from function', function() {
+		Handlers.after(obj, 'method', handler1);
+		Handlers.after(obj, 'method', handler2);
+		equal(obj.method(), returnValue, 'return value was as expected');
 	});
 
 	test('should be able to restore original method', function() {

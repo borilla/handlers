@@ -1,10 +1,13 @@
 describe('Handlers', function() {
 
-	var sandbox, obj, method, handler1, handler2, handler3;
+	var sandbox, obj, method, returnValue, handler1, handler2, handler3;
 
 	beforeEach(function() {
 		sandbox = sinon.sandbox.create();
-		method = sandbox.stub();
+		returnValue = {};
+		method = sandbox.spy(function() {
+			return returnValue;
+		});
 		handler1 = sandbox.stub();
 		handler2 = sandbox.stub();
 		handler3 = sandbox.stub();
@@ -52,6 +55,12 @@ describe('Handlers', function() {
 		assert(typeof obj.method.before == 'function', 'added before method');
 		assert(typeof obj.method.after == 'function', 'added after method');
 		assert(typeof obj.method.restore == 'function', 'added restore method');
+	});
+
+	it('should return original return value from function', function() {
+		Handlers.after(obj, 'method', handler1);
+		Handlers.after(obj, 'method', handler2);
+		expect(obj.method()).to.equal(returnValue, 'return value was as expected');
 	});
 
 	it('should be able to chain "before" methods', function() {
