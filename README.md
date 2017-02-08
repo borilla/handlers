@@ -2,7 +2,7 @@
 
 ## What does it do?
 
-Wrap any function with ```before``` and ```after``` functions, that allow you to inject functions that will be automatically run before and/or after the function is invoked
+Wrap any function with ```before``` and ```after``` functions that will be automatically run before and/or after the function is invoked
 
 ## Why?
 
